@@ -187,7 +187,7 @@
 		<h1>SPIP1.0 Character Grid Editor</h1>
         
         <div class="instructions">
-          <h3>How to use:</h3>
+          <h3>How to use Editor:</h3>
             <ul>
                 <li>Select a color from the palette             &nbsp;&nbsp;</li>
                 <li>Click on grid cells to draw your design</li>
@@ -203,13 +203,13 @@
 		
       <div class="editor-container">
             <div class="grid-editor">
-                <h3>Grid Editor</h3>
+                <h3>Grid Editor - Click on a color and then click on the cells you want to fill&nbsp;</h3>
                 
                 <div class="grid-size-controls">
-                    <label for="rows">Rows:</label>
-                    <input type="number" id="rows" min="1" max="50" value="10">
+                  <label for="rows">Rows:</label>
+                    <input type="number" id="rows" min="1" max="50" value="8">
                     <label for="cols">Columns:</label>
-                    <input type="number" id="cols" min="1" max="50" value="10">
+                    <input type="number" id="cols" min="1" max="50" value="8">
                     <button onclick="resizeGrid()">Resize/Clear Grid</button>
                 </div>
                 
@@ -220,18 +220,18 @@
             
             <div class="controls">
                 <h3>Color Palette</h3>
-                <div class="color-palette" id="colorPalette">
+              <div class="color-palette" id="colorPalette">
                     <!-- Color options will be generated here -->
                 </div>
                 
-                <h3>Code Editor</h3>
+                <h3>Code Editor (Or paste the code your buddy sent you here)</h3>
                 <textarea id="codeInput" placeholder="Enter your code here or edit it directly"></textarea>
                 <button onclick="updateGridFromCode()">Update Grid from Code</button>
                 <div class="action-buttons">
                     <button onclick="clearGrid()">Clear Grid</button>
                     <button onclick="randomizeGrid()">Randomize Grid</button>
                 </div>
-            </div>
+        </div>
         </div>
 		
       <div class="instructions">
