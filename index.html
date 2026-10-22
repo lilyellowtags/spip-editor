@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Character Grid Editor</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        .container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+        }
+        .editor-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .grid-editor {
+            flex: 1;
+            min-width: 300px;
+        }
+        .controls {
+            flex: 1;
+            min-width: 300px;
+        }
+        .color-palette {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+        }
+        .color-option {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 2px solid #ddd;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .color-option:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 8px rgba(0,0,0,0.3);
+        }
+        .color-option.selected {
+            border-color: #333;
+            transform: scale(1.15);
+            box-shadow: 0 0 12px rgba(0,0,0,0.4);
+        }
+        .grid-container {
+            margin: 20px 0;
+            overflow: auto;
+            border: 1px solid #ddd;
+            padding: 10px;
+            background-color: #f9f9f9;
+        }
+        canvas {
+            border: 1px solid #ccc;
+            cursor: pointer;
+            display: block;
+            margin: 0 auto;
+        }
+        .grid-size-controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            align-items: center;
+        }
+        .grid-size-controls input {
+            width: 60px;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .grid-size-controls label {
+            margin-right: 5px;
+        }
+        textarea {
+            width: 100%;
+            height: 150px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-family: monospace;
+            resize: vertical;
+        }
+        button {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 0;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .instructions {
+            background-color: #e8f4f8;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        .instructions h3 {
+            margin-top: 0;
+        }
+        .instructions ul {
+            padding-left: 20px;
+        }
+        .instructions li {
+            margin-bottom: 5px;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #ddd;
+            color: #666;
+            font-size: 14px;
+        }
+        .footer a {
+            color: #4CAF50;
+            text-decoration: none;
+        }
+        .footer a:hover {
+            text-decoration: underline;
+        }
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .action-buttons button {
+            flex: 1;
+        }
+        .warning {
+            background-color: #fff3cd;
+            border: 1px solid #ffeaa7;
+            color: #856404;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+        }
+		.protocol-info {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+        .protocol-info h3 {
+            margin-top: 0;
+        }
+        .protocol-info p {
+            margin-bottom: 10px;
+        }
+        .protocol-info code {
+            background-color: #e9ecef;
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+		<h1>SPIP1.0 Character Grid Editor</h1>
+        
+        <div class="instructions">
+          <h3>How to use:</h3>
+            <ul>
+                <li>Select a color from the palette             &nbsp;&nbsp;</li>
+                <li>Click on grid cells to draw your design</li>
+                <li>Adjust grid dimensions using the controls</li>
+                <li>Modify code directly and see changes in real-time</li>
+                <li>Copy your code to share with others</li>
+            </ul>
+        </div>
+		
+        <div class="warning">
+            ⚠️ Note: Resizing the grid will clear the current grid. All existing work will be lost.
+        </div>
+		
+      <div class="editor-container">
+            <div class="grid-editor">
+                <h3>Grid Editor</h3>
+                
+                <div class="grid-size-controls">
+                    <label for="rows">Rows:</label>
+                    <input type="number" id="rows" min="1" max="50" value="10">
+                    <label for="cols">Columns:</label>
+                    <input type="number" id="cols" min="1" max="50" value="10">
+                    <button onclick="resizeGrid()">Resize/Clear Grid</button>
+                </div>
+                
+                <div class="grid-container">
+                    <canvas id="gridCanvas"></canvas>
+                </div>
+            </div>
+            
+            <div class="controls">
+                <h3>Color Palette</h3>
+                <div class="color-palette" id="colorPalette">
+                    <!-- Color options will be generated here -->
+                </div>
+                
+                <h3>Code Editor</h3>
+                <textarea id="codeInput" placeholder="Enter your code here or edit it directly"></textarea>
+                <button onclick="updateGridFromCode()">Update Grid from Code</button>
+                <div class="action-buttons">
+                    <button onclick="clearGrid()">Clear Grid</button>
+                    <button onclick="randomizeGrid()">Randomize Grid</button>
+                </div>
+            </div>
+        </div>
+		
+      <div class="instructions">
+        <h3>Usage Tips:</h3>
+            <ul>
+                <li>Copy codes from the editor and paste them into messages to share your designs</li>
+                <li>Paste codes from messages into the code editor to recreate designs</li>
+                <li>The protocol format is: <code>columns:characters</code></li>
+              <li>Each character represents a color according to the palette above</li>
+                <li>If you want to resize your grid without losing your work, mess around with the code to the right!&nbsp;</li>
+            </ul>
+        </div>
+
+        <div class="protocol-info">
+            <h3>SPIP1.0 Protocol Explanation (tl;dr version):</h3>
+            <p>This editor uses a simple protocol where:</p>
+            <p><code>columns:characters</code></p>
+            <p>Where:</p>
+            <ul>
+                <li><code>columns</code> is the number of columns in your grid</li>
+                <li><code>characters</code> represent colors, with each character corresponding to a specific color</li>
+                <li>Characters are mapped to colors as shown in the palette above</li>
+            </ul>
+            <p>Example: <code>3:yzyzyzyzyz</code> creates a 3x3 checkerboard where 'y' is black and 'z' is white.</p>
+        </div>
+		<div class="protocol-info">
+            <h3>Small Packet Image Protocol 1.0 Full Documentation:</h3>
+            <p>Small Packet Image Protocol 1.0 (SPIP1) was created to send packets of characters that can then be unencrypted into colored images compiled of small numbers of pixels over a variety of protocols, but MeshCore was the intended first usecase. Due to limited packet size, the typical canvas size can vary from 3x3 to 12x12. It is recommended to keep the total number of pixels to be limited to around 120 total, as standard MeshCore packets are often limited to 120 to 130 characters (depending on your companion's settings).</p>
+          <h4>Protocol Packet Format:&nbsp;</h4>
+            <p>Each packet should start with a number followed by a colon. <br>
+              The number specifies the number of columns to divide the grid into. <br>
+              After the colon, the packet should contain a sequence of alphabetical and numerical characters representing colors. <br>
+              The English alphabetical characters represent colors, except for Y and Z, which represent black and white. <br>
+              There are 8x full saturation colors, as well as 8x 50% saturation variations and 8x 50% darker variations to make 24 colors outside of the grayscale denoted by Y, Z, and 1-9. <br>
+              The numerical characters 1-9 represent shades of gray. <br>
+              The numerical character 0 is reserved for future use. <br>
+              Currently lowercase and uppercase characters should point to the same color value, as capitalization will not affect the intended color. <br>
+              In future updates, capital and lowercase letters can potentially allow for a larger color pallet, or other parameters to be set. It's all up in the air, I just wanted to get this proof-of-concept out.&nbsp; &nbsp;&nbsp;</p>
+          <p>Characters and their corresponding hex codes:</p>
+            <ul>
+              <li> a: #FF0000&nbsp;</li>
+              <li>b: #ff8080&nbsp;</li>
+              <li>c: #7e0000&nbsp;</li>
+              <li>d: #FF7F00&nbsp;</li>
+              <li>e: #ffbf80S&nbsp;</li>
+              <li>f: #7f4000&nbsp;</li>
+              <li>g: #FFFF00&nbsp;</li>
+              <li>h: #ffff80&nbsp;</li>
+              <li>i: #7f7f00&nbsp;</li>
+              <li>j: #00FF00&nbsp;</li>
+              <li>k: #a8ff81&nbsp;</li>
+              <li>l: #287f00&nbsp;</li>
+              <li>m: #0000FF&nbsp;</li>
+              <li>n: #8080ff&nbsp;</li>
+              <li>o: #000080&nbsp;</li>
+              <li>p: #9300ff&nbsp;</li>
+              <li>q: #ca80ff&nbsp;</li>
+              <li>r: #4B0082&nbsp;</li>
+              <li>s: #00ffff&nbsp;</li>
+              <li>t: #7effff&nbsp;</li>
+              <li>u: #008080&nbsp;</li>
+              <li>v: #ff008a&nbsp;</li>
+              <li>w: #ff80c3&nbsp;</li>
+              <li>x: #800044&nbsp;</li>
+              <li>y: #000000&nbsp;</li>
+              <li>z: #FFFFFF&nbsp;</li>
+              <li>1: #1A1A1A&nbsp;</li>
+              <li>2: #333333&nbsp;</li>
+              <li>3: #4D4D4D&nbsp;</li>
+              <li>4: #666666&nbsp;</li>
+              <li>5: #808080&nbsp;</li>
+              <li>6: #999999&nbsp;</li>
+              <li>7: #B3B3B3&nbsp;</li>
+              <li>8: #CCCCCC&nbsp;</li>
+              <li>9: #E5E5E5&nbsp;</li>
+              <li>0: RESERVED&nbsp;</li>
+            </ul>
+            <p>Example: <code>3:yzyzyzyzyz</code> creates a 3x3 checkerboard where 'y' is black and 'z' is white.</p>
+			<p>2nd Example: <code>8:zyyzzyyzyaayyaayyaaaaaayzyaaaayzzzyaayzzzzzyyzzz</code> creates a red heart with a black outline and white background. Try it yourself!</p>
+      </div>
+      <div class="footer">
+            Created by <a href="https://www.lilyellowtags.com" target="_blank">@lilyellowtags</a>
+        </div>
+    </div>
+
+    <script>
+        // Color mapping
+        const colorMap = {
+            'a': '#FF0000',
+            'b': '#ff8080',
+            'c': '#7e0000',
+            'd': '#FF7F00',
+            'e': '#ffbf80',
+            'f': '#7f4000',
+            'g': '#FFFF00',
+            'h': '#ffff80',
+            'i': '#7f7f00',
+            'j': '#00FF00',
+            'k': '#a8ff81',
+            'l': '#287f00',
+            'm': '#0000FF',
+            'n': '#8080ff',
+            'o': '#000080',
+            'p': '#9300ff',
+            'q': '#ca80ff',
+            'r': '#4B0082',
+            's': '#00ffff',
+            't': '#7effff',
+            'u': '#008080',
+            'v': '#ff008a',
+            'w': '#ff80c3',
+            'x': '#800044',
+            'y': '#000000',
+            'z': '#FFFFFF',
+            '1': '#1A1A1A',
+            '2': '#333333',
+            '3': '#4D4D4D',
+            '4': '#666666',
+            '5': '#808080',
+            '6': '#999999',
+            '7': '#B3B3B3',
+            '8': '#CCCCCC',
+            '9': '#E5E5E5'
+        };
+
+        // Reverse color map for code generation
+        const reverseColorMap = {};
+        Object.keys(colorMap).forEach(key => {
+            reverseColorMap[colorMap[key]] = key;
+        });
+
+        let currentColor = '#FFFFFF'; // Start with white to match code behavior
+        let selectedColorKey = 'z'; // Default to white
+        let grid = [];
+        let rows = 10;
+        let cols = 10;
+        let cellSize = 30;
+        let canvas = null;
+
+        // Initialize the color palette
+        function initColorPalette() {
+            const palette = document.getElementById('colorPalette');
+            palette.innerHTML = '';
+            
+            Object.keys(colorMap).forEach(key => {
+                const colorOption = document.createElement('div');
+                colorOption.className = 'color-option';
+                colorOption.style.backgroundColor = colorMap[key];
+                colorOption.dataset.key = key;
+                colorOption.title = key;
+                
+                colorOption.addEventListener('click', () => {
+                    // Remove selected class from all
+                    document.querySelectorAll('.color-option').forEach(el => {
+                        el.classList.remove('selected');
+                    });
+                    
+                    // Add selected class to clicked
+                    colorOption.classList.add('selected');
+                    
+                    currentColor = colorMap[key];
+                    selectedColorKey = key;
+                });
+                
+                palette.appendChild(colorOption);
+            });
+            
+            // Select first color by default (white)
+            if (palette.children.length > 0) {
+                palette.children[18].classList.add('selected'); // z is white
+            }
+        }
+
+        // Initialize the grid
+        function initGrid() {
+            canvas = document.getElementById('gridCanvas');
+            updateGridDimensions();
+            renderGrid();
+        }
+
+        // Update grid dimensions
+        function updateGridDimensions() {
+            rows = parseInt(document.getElementById('rows').value) || 10;
+            cols = parseInt(document.getElementById('cols').value) || 10;
+            
+            // Initialize grid with empty cells (null means white in code)
+            grid = [];
+            for (let i = 0; i < rows; i++) {
+                const row = [];
+                for (let j = 0; j < cols; j++) {
+                    row.push(null); // null represents empty/white cell
+                }
+                grid.push(row);
+            }
+            
+            // Set canvas size
+            canvas.width = cols * cellSize;
+            canvas.height = rows * cellSize;
+        }
+
+        // Resize grid based on input
+        function resizeGrid() {
+            if (confirm("Resizing the grid will clear all current work. Continue?")) {
+                updateGridDimensions();
+                renderGrid();
+                updateCodeFromGrid();
+            }
+        }
+
+        // Render the grid to canvas
+        function renderGrid() {
+            if (!canvas) return;
+            
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Draw grid cells
+            for (let i = 0; i < rows; i++) {
+                for (let j = 0; j < cols; j++) {
+                    const x = j * cellSize;
+                    const y = i * cellSize;
+                    
+                    // Draw cell background
+                    if (grid[i][j]) {
+                        ctx.fillStyle = grid[i][j];
+                    } else {
+                        // Show white for empty cells to match code behavior
+                        ctx.fillStyle = '#FFFFFF';
+                    }
+                    ctx.fillRect(x, y, cellSize, cellSize);
+                    
+                    // Draw border
+                    ctx.strokeStyle = '#ccc';
+                    ctx.strokeRect(x, y, cellSize, cellSize);
+                }
+            }
+        }
+
+        // Handle canvas click
+        function handleCanvasClick(event) {
+            if (!canvas) return;
+            
+            const rect = canvas.getBoundingClientRect();
+            const x = event.clientX - rect.left;
+            const y = event.clientY - rect.top;
+            
+            const col = Math.floor(x / cellSize);
+            const row = Math.floor(y / cellSize);
+            
+            if (row >= 0 && row < rows && col >= 0 && col < cols) {
+                // Update grid
+                grid[row][col] = currentColor;
+                
+                // Render the updated grid
+                renderGrid();
+                
+                // Update code
+                updateCodeFromGrid();
+            }
+        }
+
+        // Update code from grid
+        function updateCodeFromGrid() {
+            const code = `${cols}:${grid.flat().map(cell => cell ? reverseColorMap[cell] || 'z' : 'z').join('')}`;
+            document.getElementById('codeInput').value = code;
+        }
+
+        // Update grid from code input
+        function updateGridFromCode() {
+            const code = document.getElementById('codeInput').value.trim();
+            
+            if (!code) return;
+            
+            try {
+                const parts = code.split(':', 2);
+                if (parts.length !== 2) {
+                    throw new Error("Invalid format: missing colon");
+                }
+                
+                const cols = parseInt(parts[0]);
+                if (isNaN(cols) || cols <= 0) {
+                    throw new Error("Invalid number of columns");
+                }
+                
+                // Set grid dimensions
+                document.getElementById('cols').value = cols;
+                rows = Math.ceil(parts[1].length / cols);
+                document.getElementById('rows').value = rows;
+                
+                // Update grid
+                updateGridDimensions();
+                
+                // Fill grid with colors from code
+                const colorChars = parts[1].split('');
+                let index = 0;
+                
+                for (let i = 0; i < rows; i++) {
+                    for (let j = 0; j < cols; j++) {
+                        if (index < colorChars.length) {
+                            const char = colorChars[index];
+                            if (colorMap[char]) {
+                                grid[i][j] = colorMap[char];
+                            } else {
+                                grid[i][j] = null;
+                            }
+                            index++;
+                        } else {
+                            grid[i][j] = null;
+                        }
+                    }
+                }
+                
+                renderGrid();
+            } catch (error) {
+                alert(`Error parsing code: ${error.message}`);
+            }
+        }
+
+        // Clear the grid
+        function clearGrid() {
+            if (confirm("Clear all work?")) {
+                for (let i = 0; i < rows; i++) {
+                    for (let j = 0; j < cols; j++) {
+                        grid[i][j] = null;
+                    }
+                }
+                renderGrid();
+                updateCodeFromGrid();
+            }
+        }
+
+        // Randomize the grid
+        function randomizeGrid() {
+            if (confirm("Randomize all cells?")) {
+                for (let i = 0; i < rows; i++) {
+                    for (let j = 0; j < cols; j++) {
+                        if (Math.random() > 0.5) {
+                            const colors = Object.keys(colorMap);
+                            const randomColor = colors[Math.floor(Math.random() * colors.length)];
+                            grid[i][j] = colorMap[randomColor];
+                        } else {
+                            grid[i][j] = null;
+                        }
+                    }
+                }
+                renderGrid();
+                updateCodeFromGrid();
+            }
+        }
+
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            initColorPalette();
+            initGrid();
+            
+            // Add click event to canvas
+            canvas.addEventListener('click', handleCanvasClick);
+            
+            // Set up code input change listener
+            document.getElementById('codeInput').addEventListener('input', function() {
+                updateGridFromCode();
+            });
+        });
+
+        // Handle window resize
+        window.addEventListener('resize', function() {
+            if (canvas) {
+                renderGrid();
+            }
+        });
+    </script>
+</body>
+</html>
