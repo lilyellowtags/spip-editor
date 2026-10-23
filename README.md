@@ -66,3 +66,9 @@ or:
 █ █
 
 As another example, 8:zyyzzyyzyaayyaayyaaaaaayzyaaaayzzzyaayzzzzzyyzzz creates a red heart with a black outline and white background. Try it yourself!
+
+## Supported in
+
+- [MeshMonitor](https://github.com/Yeraze/meshmonitor): draws SPIP messages as pixel images in Meshtastic and MeshCore channel and direct message views ([Yeraze/meshmonitor#5945](https://github.com/Yeraze/meshmonitor/pull/5945)).
+
+![SPIP images in MeshMonitor](https://raw.githubusercontent.com/maxhayim/meshmonitor/ca5a5efaefd4f3e6d18b3bec978c9d6ab06068fb/docs/public/images/features/spip-images.png)
